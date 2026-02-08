@@ -13,4 +13,6 @@ public interface StudentService {
     StudentResponseDto updateStudentByUuid(String uuid, StudentUpdateDto studentUpdateDto);
     StudentResponseDto searchByUuid(String uuid);
     List<StudentResponseDto> searchStudentByName(String name);
+    List<StudentResponseDto> getAllStudent();
+
 }

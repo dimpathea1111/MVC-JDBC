@@ -2,10 +2,7 @@ package model.respository;
 
 import model.entities.Student;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +14,7 @@ public class StudentRepository {
 
     public List<Student> findAll(){
         String sql= """
-                SELECT * FROM students;
+                SELECT * FROM students WHERE id=?;
                 """;
 
         try(Connection connection= DriverManager.getConnection(
@@ -25,16 +22,36 @@ public class StudentRepository {
         )){
 //            Statement statement=connection.prepareStatement(sql);
 //            ResultSet resultSet=statement.getResultSet();
-            Statement statement=connection.createStatement();
+//            Statement statement=connection.createStatement();
+//            ResultSet resultSet=statement.executeQuery(sql);
+//            while (resultSet.next()){
+//                System.out.println(resultSet.getInt("id"));
+//                System.out.println(resultSet.getString("uuid"));
+//                System.out.println(resultSet.getString("user_name"));
+//            }
+//            System.out.println("Connection to database successfully" );
+
+
+//            Statement statement=connection.createStatement();
+            PreparedStatement statement=connection.prepareStatement(sql);
             ResultSet resultSet=statement.executeQuery(sql);
+//            List<Student>students=new ArrayList<>();
+            Student student=new Student();
             while (resultSet.next()){
-                System.out.println(resultSet.getInt("id"));
-                System.out.println(resultSet.getString("uuid"));
-                System.out.println(resultSet.getString("user_name"));
+//                Student student=new Student();
+                student.setId(resultSet.getInt("id"));
+                student.setUuid(resultSet.getString("uuid"));
+                student.setUuid(resultSet.getString("email"));
+                student.setUuid(resultSet.getString("profile"));
+                student.setUuid(resultSet.getString("card_id"));
+                student.setBirthOfDate(resultSet.getDate("birth_of_date").toLocalDate());
+
+
+
+
             }
-            System.out.println("Connection to database successfully" );
         }catch (Exception exception){
-            System.out.println("Error in fetching all students from"+exception.getMessage());
+            System.out.println("Error in fetching students  by ID from database"+exception.getMessage());
 
 
         }
@@ -46,6 +63,31 @@ public class StudentRepository {
 
     public Student save(Student student){
 
+            String sql= """
+                    INSERT INTO students(uuid, user_name, email, password, card_id, profile)
+                    VALUE(?,?,?,?,?,?,?)
+                    """;
+
+            try(Connection connection=DriverManager.getConnection(dbUrl, username,password)) {
+                PreparedStatement statement=connection.prepareStatement(sql);
+                statement.setString(1, student.getUuid());
+                statement.setString(2, student.getUserName());
+                statement.setString(3, student.getEmail());
+                statement.setString(4, student.getProfile());
+                statement.setString(4, student.getCardId());
+                statement.setDate(6, Date.valueOf(student.getBirthOfDate()));
+                int rowAffected=statement.executeUpdate();
+                if(rowAffected>0){
+                    System.out.println("New student has been added");
+                    return  student;
+                }else {
+                    System.out.println("Insert new student failed");
+                }
+
+
+            }catch (Exception exception){
+                System.out.println("Error during insert student data: "+exception.getMessage());
+            }
         return student;
 //        students.add(student);
     }
@@ -60,15 +102,21 @@ public class StudentRepository {
 
     public int delete(Student student){
 
-
+            String sql="DELETE FROM students WHERE id=?";
+            student.getId();
         return 1;
-        //        students.remove(student);
-//        return 1;
+
     }
 
     public Student update(Student student){
 //        ...
-        return student;
+        String sql= """
+                UPDATE students
+                SET profile=?,....
+                WHERE id=?
+                """;
+        student.getId();
+        return null;
     }
 
 }
